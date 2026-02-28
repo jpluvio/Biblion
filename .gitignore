@@ -1,0 +1,77 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+#planning
+/planning/plan.md
+/planning/report.md
+/planning/specs.md
+/planning/corrections.md
+
+#backups
+/backups
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma - Ignore SQLite database and journals
+/prisma/*.db
+/prisma/*.db-journal
+
+# system
+Thumbs.db
+
+# ide
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# logs
+*.log
+
+# temp
+.tmp/
+
+# Custom - Local certificates for HTTPS dev
+certificates/
+
+# Custom - Backups
+migrations 2/
+*.bak
+
+# Custom - Local User Data
+/public/uploads
+
+# Personali & temporanei
+src/app/components/NutritionPieChart.tsx\nprisma/dev.db*\ndump.sql\nschema.sql

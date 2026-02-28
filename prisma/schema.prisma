@@ -1,0 +1,180 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id              String          @id @default(cuid())
+  title           String
+  authorId        String
+  isbn            String?
+  publisher       String?
+  language        String?
+  publishYear     Int?
+  pages           Int?
+  owner           String?
+  userId          String?
+  coverImage      String?
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  user            User?           @relation("BookOwner", fields: [userId], references: [id])
+  author          Author          @relation(fields: [authorId], references: [id])
+  loans           Loan[]
+  readingStatuses ReadingStatus[]
+  categories      Category[]      @relation("BookToCategory")
+  tags            Tag[]           @relation("BookToTag")
+  locationId      String?
+  location        Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  books Book[] @relation("BookToTag")
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String
+  gender    String?
+  biography String?
+  createdAt DateTime @default(now())
+  books     Book[]
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String     @unique
+  parentId String?
+  color    String?
+  icon     String?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  books    Book[]     @relation("BookToCategory")
+}
+
+model Location {
+  id        String     @id @default(cuid())
+  name      String
+  parentId  String?
+  parent    Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Location[] @relation("LocationHierarchy")
+  books     Book[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model User {
+  id              String          @id @default(cuid())
+  name            String?
+  email           String?         @unique
+  emailVerified   DateTime?
+  password        String?
+  image           String?
+  role            String          @default("USER")
+  xp              Int             @default(0)
+  level           Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  accounts        Account[]
+  ownedBooks      Book[]          @relation("BookOwner")
+  loans           Loan[]
+  readingStatuses ReadingStatus[]
+  sessions        Session[]
+  badges          UserBadge[]
+}
+
+model ReadingStatus {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  status    String
+  updatedAt DateTime @updatedAt
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}
+
+model Loan {
+  id             String    @id @default(cuid())
+  lenderId       String
+  bookId         String
+  borrowerName   String
+  borrowedAt     DateTime  @default(now())
+  dueDate        DateTime?
+  returnedAt     DateTime?
+  previousStatus String?
+  book           Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [lenderId], references: [id], onDelete: Cascade)
+
+  @@index([lenderId])
+  @@index([bookId])
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String
+  icon        String
+  xpBonus     Int         @default(0)
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
